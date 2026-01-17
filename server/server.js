@@ -11,33 +11,46 @@ dotenv.config();
 
 const app = express();
 
+// CORS
 app.use(
   cors({
-    origin:[ "http://localhost:5173",
-    process.env.CLIENT_URL],
-    credentials: true, 
+    origin: function (origin, callback) {
+      const allowedOrigins = [
+        "http://localhost:5173",
+        "https://gig-flow-murex.vercel.app",
+        "https://gig-flow-mo9vgl64n-deepak-yadavs-projects-ef596899.vercel.app",
+      ];
+
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
   })
 );
 
-app.use(express.json());  
+app.use(express.json());
 app.use(cookieParser());
 
-app.use("/api/auth", authRoutes);
-
-
+// DB first
 connectDB();
 
-// middleware
+// Routes
+app.use("/api/auth", authRoutes);
 app.use("/api/gigs", gigRoutes);
 app.use("/api/bids", bidRoutes);
 
+// Health check
+app.get("/api/health", (req, res) => {
+  res.status(200).json({ status: "OK" });
+});
 
-
-// test route
+// Root test
 app.get("/", (req, res) => {
   res.send("GigFlow API running...");
 });
-
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
