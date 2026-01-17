@@ -35,11 +35,10 @@ app.use(
   })
 );
 
-app.options("*", cors());
+app.options("/", cors());
 
 
 /* ✅ VERY IMPORTANT: handle preflight */
-app.options("*", cors());
 
 app.use(express.json());
 app.use(cookieParser());
