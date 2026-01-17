@@ -20,8 +20,6 @@ app.use(
       "https://gig-flow-2ltofh94y-deepak-yadavs-projects-ef596899.vercel.app",
     ],
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
