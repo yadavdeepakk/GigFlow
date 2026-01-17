@@ -5,41 +5,38 @@ export default function MyBids() {
   const [bids, setBids] = useState([]);
 
   useEffect(() => {
-    api.get("/bids/my").then(res => setBids(res.data));
+    const fetchBids = async () => {
+      try {
+        const res = await api.get("/bids/my", {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+
+        setBids(res.data);
+      } catch (error) {
+        alert(error, "Failed to load bids");
+      }
+    };
+
+    fetchBids();
   }, []);
 
   return (
-    <div className="container">
-      <h1 className="title">My Bids</h1>
+    <div className="p-10">
+      <h1 className="text-2xl font-bold mb-6">My Bids</h1>
 
-      {bids.length === 0 && (
+      {bids.length === 0 ? (
         <p className="text-gray-400">You haven’t placed any bids yet.</p>
-      )}
-
-      <div className="grid">
-        {bids.map(b => (
-          <div key={b._id} className="card">
-            <h3 className="text-lg font-semibold">
-              {b.gigId?.title}
-            </h3>
-
-            <p className="text-gray-400">
-              {b.message}
-            </p>
-
-            <p className="mt-2 text-indigo-400 font-bold">
-              ₹{b.amount}
-            </p>
-
-            <p className="mt-2 text-sm">
-              Status:{" "}
-              <span className="text-yellow-400">
-                {b.status || "Pending"}
-              </span>
-            </p>
+      ) : (
+        bids.map((bid) => (
+          <div key={bid._id} className="card mb-4">
+            <h3 className="font-semibold">{bid.gigId?.title}</h3>
+            <p className="text-gray-400">{bid.message}</p>
+            <p className="text-indigo-400 mt-2">₹{bid.price}</p>
           </div>
-        ))}
-      </div>
+        ))
+      )}
     </div>
   );
 }

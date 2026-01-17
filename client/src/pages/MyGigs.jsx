@@ -5,36 +5,37 @@ export default function MyGigs() {
   const [gigs, setGigs] = useState([]);
 
   useEffect(() => {
-    api.get("/gigs/my").then(res => setGigs(res.data));
+    const fetchMyGigs = async () => {
+      try {
+        const res = await api.get("/gigs/my", {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+        setGigs(res.data);
+      } catch (error) {
+        alert(error, "Failed to load my gigs");
+      }
+    };
+
+    fetchMyGigs();
   }, []);
 
   return (
-    <div className="container">
-      <h1 className="title">My Gigs</h1>
+    <div className="p-10">
+      <h1 className="text-2xl font-bold mb-6">My Gigs</h1>
 
-      {gigs.length === 0 && (
+      {gigs.length === 0 ? (
         <p className="text-gray-400">You haven’t posted any gigs yet.</p>
-      )}
-
-      <div className="grid">
-        {gigs.map(g => (
-          <div key={g._id} className="card">
-            <h3 className="text-xl font-semibold">{g.title}</h3>
-            <p className="text-gray-400">{g.description}</p>
-
-            <p className="mt-2 text-indigo-400 font-bold">
-              ₹{g.budget}
-            </p>
-
-            <p className="mt-2 text-sm">
-              Status:{" "}
-              <span className="text-green-400">
-                {g.status}
-              </span>
-            </p>
+      ) : (
+        gigs.map((gig) => (
+          <div key={gig._id} className="card mb-4">
+            <h3 className="text-lg font-semibold">{gig.title}</h3>
+            <p className="text-gray-400">{gig.description}</p>
+            <p className="text-indigo-400 mt-2">₹{gig.budget}</p>
           </div>
-        ))}
-      </div>
+        ))
+      )}
     </div>
   );
 }

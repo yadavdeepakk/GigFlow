@@ -1,15 +1,15 @@
 import { useState } from "react";
 import api from "../api/axios";
+import { useNavigate } from "react-router-dom";
 
 export default function CreateGig() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [budget, setBudget] = useState("");
-  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const submit = async (e) => {
     e.preventDefault();
-    setLoading(true);
 
     try {
       await api.post("/gigs", {
@@ -18,13 +18,10 @@ export default function CreateGig() {
         budget,
       });
 
-      alert("Gig created successfully!");
-      window.location.href = "/";
+      alert("✅ Gig created successfully");
+      navigate("/my-gigs");
     } catch (error) {
-      console.error(error);
-      alert("Failed to create gig");
-    } finally {
-      setLoading(false);
+      alert(error.response?.data?.message || "Failed to create gig");
     }
   };
 
@@ -38,7 +35,7 @@ export default function CreateGig() {
         <form onSubmit={submit} className="space-y-4">
           <input
             className="input"
-            placeholder="Gig Title"
+            placeholder="Gig title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             required
@@ -46,7 +43,7 @@ export default function CreateGig() {
 
           <textarea
             className="input h-28"
-            placeholder="Gig Description"
+            placeholder="Describe the work"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             required
@@ -61,13 +58,7 @@ export default function CreateGig() {
             required
           />
 
-          <button
-            type="submit"
-            className="btn w-full"
-            disabled={loading}
-          >
-            {loading ? "Creating..." : "Create Gig"}
-          </button>
+          <button className="btn w-full">Create Gig</button>
         </form>
       </div>
     </div>

@@ -7,30 +7,16 @@ const bidSchema = new mongoose.Schema(
       ref: "Gig",
       required: true,
     },
-
     freelancerId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-
-    message: {
-      type: String,
-      required: true,
-    },
-
-    price: {
-      type: Number,
-      required: true,
-    },
-
-    status: {
-      type: String,
-      enum: ["pending", "hired", "rejected"],
-      default: "pending",
-    },
+    message: { type: String, required: true },
+    price: { type: Number, required: true },
   },
   { timestamps: true }
 );
 
-export default mongoose.model("Bid", bidSchema);
+const Bid = mongoose.models.Bid || mongoose.model("Bid", bidSchema);
+export default Bid;

@@ -1,39 +1,39 @@
-import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import api from "../api/axios";
 
 export default function GigDetail() {
   const { id } = useParams();
 
-  const [bids, setBids] = useState([]);
+  const [gig, setGig] = useState(null);
   const [message, setMessage] = useState("");
   const [price, setPrice] = useState("");
   const [hasBid, setHasBid] = useState(false);
-
-  // derived state (no setter needed → no warnings)
-  const gigAssigned = bids.some((b) => b.status === "hired");
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const fetchBids = async () => {
-      const res = await api.get(`/bids/${id}`);
-      setBids(res.data);
-
-      // if current user already bid, backend already blocks duplicates
-      if (res.data.length > 0) {
-        setHasBid(true);
+    const fetchGig = async () => {
+      try {
+        const res = await api.get(`/gigs/${id}`);
+        setGig(res.data);
+        setHasBid(res.data.hasBid || false);
+      } catch (err) {
+        alert(err, "Failed to load gig");
       }
     };
 
-    fetchBids();
+    fetchGig();
   }, [id]);
 
-  const submitBid = async () => {
+  const placeBid = async () => {
     if (!message || !price) {
       alert("Please fill all fields");
       return;
     }
 
     try {
+      setLoading(true);
+
       await api.post("/bids", {
         gigId: id,
         message,
@@ -41,113 +41,57 @@ export default function GigDetail() {
       });
 
       alert("✅ Bid placed successfully");
+      setHasBid(true);
       setMessage("");
       setPrice("");
-
-      const updated = await api.get(`/bids/${id}`);
-      setBids(updated.data);
-      setHasBid(true);
     } catch (error) {
       alert(error.response?.data?.message || "Failed to place bid");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const hire = async (bidId) => {
-    try {
-      await api.patch(`/bids/${bidId}/hire`);
-      const updated = await api.get(`/bids/${id}`);
-      setBids(updated.data);
-    } catch (error) {
-      alert( error, "Failed to hire bid");
-    }
-  };
+  if (!gig) return null;
 
   return (
-    <div className="container py-12 max-w-3xl">
-      {/* ===== BIDS LIST ===== */}
-      <h2 className="text-2xl font-bold mb-6">Bids</h2>
+    <div className="px-10 py-8">
+      <h1 className="text-3xl font-bold mb-2">{gig.title}</h1>
+      <p className="text-gray-400 mb-6">{gig.description}</p>
 
-      <div className="space-y-4 mb-10">
-        {bids.map((b) => (
-          <div
-            key={b._id}
-            className="card border-l-4"
-            style={{
-              borderLeftColor:
-                b.status === "hired"
-                  ? "#22c55e"
-                  : b.status === "rejected"
-                  ? "#ef4444"
-                  : "#6366f1",
-            }}
+      <h2 className="text-xl font-semibold mb-4">Bids</h2>
+
+      {hasBid ? (
+        <p className="text-green-400 font-semibold">
+          ✅ You have already placed a bid on this gig
+        </p>
+      ) : (
+        <div className="card w-105 space-y-4">
+          <h3 className="text-lg font-semibold">Submit a Bid</h3>
+
+          <input
+            className="input"
+            placeholder="Your message"
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+          />
+
+          <input
+            type="number"
+            className="input"
+            placeholder="Your price (₹)"
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
+          />
+
+          <button
+            onClick={placeBid}
+            disabled={loading}
+            className="btn w-full"
           >
-            <p className="text-gray-300">{b.message}</p>
-
-            <div className="flex justify-between items-center mt-4">
-              <p className="font-bold text-indigo-400">₹{b.price}</p>
-
-              <span
-                className={`text-sm font-semibold ${
-                  b.status === "hired"
-                    ? "text-green-400"
-                    : b.status === "rejected"
-                    ? "text-red-400"
-                    : "text-yellow-400"
-                }`}
-              >
-                {b.status.toUpperCase()}
-              </span>
-            </div>
-
-            {b.status === "pending" && (
-              <button
-                onClick={() => hire(b._id)}
-                className="btn mt-4"
-              >
-                Hire
-              </button>
-            )}
-          </div>
-        ))}
-      </div>
-
-      {/* ===== SUBMIT BID ===== */}
-      <div className="card w-full max-w-md mx-auto">
-        <h3 className="text-xl font-semibold mb-4">Submit a Bid</h3>
-
-        {gigAssigned ? (
-          <p className="text-red-400 font-semibold">
-            🚫 This gig has already been assigned
-          </p>
-        ) : hasBid ? (
-          <p className="text-green-400 font-semibold">
-            ✅ You have already placed a bid
-          </p>
-        ) : (
-          <div className="space-y-3">
-            <input
-              className="input"
-              placeholder="Your message"
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-            />
-
-            <input
-              className="input"
-              placeholder="Your price (₹)"
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-            />
-
-            <button
-              onClick={submitBid}
-              className="btn flex items-center gap-2 mt-2"
-            >
-              💼 Place Bid
-            </button>
-          </div>
-        )}
-      </div>
+            {loading ? "Placing..." : "Place Bid"}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

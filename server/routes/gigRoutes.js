@@ -1,28 +1,18 @@
 import express from "express";
-import auth from "../middlewares/authMiddleware.js";
-
+import protect from "../middlewares/authMiddleware.js";
 import {
-  getGigs,
-  getGigById,
   createGig,
   getMyGigs,
+  getGigs,
+  getGigById,
 } from "../controllers/gigController.js";
 
 const router = express.Router();
 
-// get all open gigs (public)
+router.post("/", protect, createGig);
+router.get("/my", protect, getMyGigs);
 router.get("/", getGigs);
-
-// get logged-in user's gigs
-router.get("/my", auth, getMyGigs);
-
-// get single gig by id
 router.get("/:id", getGigById);
-
-// create a new gig (protected)
-router.post("/", auth, createGig);
-
-router.post("/", auth, createGig);
 
 
 export default router;

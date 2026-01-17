@@ -2,23 +2,11 @@ import mongoose from "mongoose";
 
 const gigSchema = new mongoose.Schema(
   {
-    title: {
-      type: String,
-      required: true,
-      trim: true,
-    },
+    title: { type: String, required: true },
+    description: { type: String, required: true },
+    budget: { type: Number, required: true },
 
-    description: {
-      type: String,
-      required: true,
-    },
-
-    budget: {
-      type: Number,
-      required: true,
-    },
-
-    ownerId: {
+    createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
@@ -26,11 +14,12 @@ const gigSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: ["open", "assigned"],
+      enum: ["open", "assigned", "completed"],
       default: "open",
     },
   },
   { timestamps: true }
 );
 
-export default mongoose.model("Gig", gigSchema);
+const Gig = mongoose.models.Gig || mongoose.model("Gig", gigSchema);
+export default Gig;

@@ -1,34 +1,50 @@
-import Gig from "../models/gig.js";
+import Gig from "../models/Gig.js";
 
 /**
- * GET /api/gigs
- * Get all open gigs (public)
+ * Create a new gig
  */
-export const getGigs = async (req, res) => {
+export const createGig = async (req, res) => {
   try {
-    const { search } = req.query;
+    const { title, description, budget } = req.body;
 
-    const query = { status: "open" };
+    const gig = await Gig.create({
+      title,
+      description,
+      budget,
+      createdBy: req.user._id,
+    });
 
-    // search by title if provided
-    if (search) {
-      query.title = { $regex: search, $options: "i" };
-    }
-
-    const gigs = await Gig.find(query).sort({ createdAt: -1 });
-    res.json(gigs);
+    res.status(201).json(gig);
   } catch (error) {
-    res.status(500).json({ message: "Failed to fetch gigs" });
+    console.error("Create gig error:", error);
+    res.status(500).json({ message: "Failed to create gig" });
   }
 };
 
 /**
- * GET /api/gigs/:id
- * Get single gig by ID (public)
+ * Get all gigs (Explore gigs)
+ */
+export const getGigs = async (req, res) => {
+  try {
+    const gigs = await Gig.find()
+      .populate("createdBy", "name email")
+      .sort({ createdAt: -1 });
+
+    res.json(gigs);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to load gigs" });
+  }
+};
+
+/**
+ * Get single gig by ID
  */
 export const getGigById = async (req, res) => {
   try {
-    const gig = await Gig.findById(req.params.id);
+    const gig = await Gig.findById(req.params.id).populate(
+      "createdBy",
+      "name email"
+    );
 
     if (!gig) {
       return res.status(404).json({ message: "Gig not found" });
@@ -36,51 +52,21 @@ export const getGigById = async (req, res) => {
 
     res.json(gig);
   } catch (error) {
-    res.status(500).json({ message: "Failed to fetch gig" });
+    res.status(500).json({ message: "Failed to load gig" });
   }
 };
 
 /**
- * POST /api/gigs
- * Create a new gig (protected)
- */
-export const createGig = async (req, res) => {
-  try {
-    console.log("REQ USER:", req.user);
-    console.log("REQ BODY:", req.body);
-
-    const { title, description, budget } = req.body;
-
-    const gig = await Gig.create({
-      title,
-      description,
-      budget,
-      ownerId: req.user.id,
-      status: "open",
-    });
-
-    res.status(201).json(gig);
-  } catch (error) {
-    console.error("CREATE GIG FAILED ❌");
-    console.error(error);
-    res.status(500).json({ message: error.message });
-  }
-};
-
-
-
-/**
- * GET /api/gigs/my
- * Get gigs created by logged-in user (protected)
+ * Get gigs created by logged-in user (My Gigs)
  */
 export const getMyGigs = async (req, res) => {
   try {
-    const gigs = await Gig.find({ ownerId: req.user.id }).sort({
+    const gigs = await Gig.find({ createdBy: req.user._id }).sort({
       createdAt: -1,
     });
 
     res.json(gigs);
   } catch (error) {
-    res.status(500).json({ message: "Failed to fetch my gigs" });
+    res.status(500).json({ message: "Failed to load my gigs" });
   }
 };
