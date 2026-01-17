@@ -11,17 +11,16 @@ dotenv.config();
 
 const app = express();
 
-// CORS
+/* ✅ CORS – FINAL VERSION */
 app.use(
   cors({
-    origin: function (origin, callback) {
+    origin: (origin, callback) => {
       const allowedOrigins = [
         "http://localhost:5173",
-        "https://gig-flow-murex.vercel.app",
-        "process.env.CLIENT_URL",
-        "https://gig-flow-mo9vgl64n-deepak-yadavs-projects-ef596899.vercel.app",
+        process.env.CLIENT_URL,
       ];
 
+      // allow requests with no origin (like Postman)
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
@@ -29,28 +28,27 @@ app.use(
       }
     },
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
+/* ✅ VERY IMPORTANT: handle preflight */
+app.options("*", cors());
 
 app.use(express.json());
 app.use(cookieParser());
 
-// DB first
 connectDB();
 
-// Routes
+/* routes */
 app.use("/api/auth", authRoutes);
 app.use("/api/gigs", gigRoutes);
 app.use("/api/bids", bidRoutes);
 
-// Health check
+/* health */
 app.get("/api/health", (req, res) => {
-  res.status(200).json({ status: "OK" });
-});
-
-// Root test
-app.get("/", (req, res) => {
-  res.send("GigFlow API running...");
+  res.json({ status: "OK" });
 });
 
 const PORT = process.env.PORT || 5000;
