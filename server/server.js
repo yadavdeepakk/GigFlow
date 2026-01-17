@@ -18,6 +18,7 @@ app.use(
       const allowedOrigins = [
         "http://localhost:5173",
         process.env.CLIENT_URL,
+        "https://gig-flow-21t0fh94y-deepak-yadavs-projects-ef596899.vercel.app"
       ];
 
       console.log("CORS request from:", origin);
