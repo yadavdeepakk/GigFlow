@@ -14,22 +14,11 @@ const app = express();
 /* ✅ CORS – FINAL VERSION */
 app.use(
   cors({
-    origin: (origin, callback) => {
-      const allowedOrigins = [
-        "http://localhost:5173",
-        process.env.CLIENT_URL,
-        "https://gig-flow-21t0fh94y-deepak-yadavs-projects-ef596899.vercel.app"
-      ];
-
-      console.log("CORS request from:", origin);
-      console.log("Allowed origins:", allowedOrigins);
-
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
+    origin: [
+      "http://localhost:5173",
+      "https://gig-flow-murex.vercel.app",
+      "https://gig-flow-2ltofh94y-deepak-yadavs-projects-ef596899.vercel.app",
+    ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
