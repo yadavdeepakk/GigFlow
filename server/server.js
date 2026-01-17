@@ -20,7 +20,9 @@ app.use(
         process.env.CLIENT_URL,
       ];
 
-      // allow requests with no origin (like Postman)
+      console.log("CORS request from:", origin);
+      console.log("Allowed origins:", allowedOrigins);
+
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
@@ -32,6 +34,9 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
+app.options("*", cors());
+
 
 /* ✅ VERY IMPORTANT: handle preflight */
 app.options("*", cors());
