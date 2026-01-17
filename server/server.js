@@ -18,6 +18,7 @@ app.use(
       const allowedOrigins = [
         "http://localhost:5173",
         "https://gig-flow-murex.vercel.app",
+        "process.env.CLIENT_URL",
         "https://gig-flow-mo9vgl64n-deepak-yadavs-projects-ef596899.vercel.app",
       ];
 
