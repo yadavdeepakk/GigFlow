@@ -1,5 +1,5 @@
 import express from "express";
-import auth from "../middlewares/authMiddleware.js";
+import auth from "../middleware/authMiddleware.js";
 import {
   createBid,
   getBidsForGig,
